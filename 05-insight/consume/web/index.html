@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>聊天即消费 · 仪表盘</title>
+<link rel="stylesheet" href="/style.css">
+<!-- 浅色主题覆盖：必须排在 style.css 之后，靠优先级翻转深色变量 -->
+<link rel="stylesheet" href="/light.css">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>💸</text></svg>">
+</head>
+<body>
+<div class="bg-glow" aria-hidden="true"></div>
+<div id="app">
+  <!-- 侧栏 -->
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="logo">💸</div>
+      <div class="brand-txt"><b>聊天即消费</b><span>Chat · Cost · Meter</span></div>
+    </div>
+    <nav class="nav">
+      <button class="nav-item active" data-view="overview"><i>📊</i><span>用量信息</span></button>
+      <button class="nav-item" data-view="chat"><i>💬</i><span>聊天计费</span></button>
+      <button class="nav-item" data-view="billing"><i>🔑</i><span>额度与 Key</span></button>
+      <button class="nav-item" data-view="market"><i>🛒</i><span>模型广场</span></button>
+      <button class="nav-item" data-view="lab"><i>🧪</i><span>Token 实验室</span></button>
+    </nav>
+    <div class="side-foot">
+      <div class="live" id="liveBadge"><span class="dot"></span><span id="liveTxt">连接中…</span></div>
+      <div class="side-actions">
+        <button class="mini" id="btnSync">立即同步</button>
+        <button class="mini" id="btnSim">模拟 20 轮</button>
+      </div>
+      <div class="muted tiny" id="sideInfo">—</div>
+    </div>
+  </aside>
+
+  <!-- 主区 -->
+  <main class="main">
+    <header class="topbar">
+      <div class="crumb" id="crumb">用量信息</div>
+      <div class="top-right">
+        <span class="pill" id="modelPill">—</span>
+        <span class="pill ghost" id="pricePill">—</span>
+      </div>
+    </header>
+
+    <!-- ============ 用量信息 ============ -->
+    <section class="view active" id="view-overview">
+      <div class="hero-grid">
+        <div class="card balance">
+          <div class="card-head"><span>充值余额</span><span class="hint">总额度 − 已消费</span></div>
+          <div class="big-num"><span class="cur">¥</span><span id="ovRemain">0.00</span>
+            <span class="unit">CNY</span></div>
+          <div class="bar"><div class="bar-fill" id="ovBar"></div></div>
+          <div class="row-between tiny muted">
+            <span>已消费 ¥<b id="ovSpent">0.00</b></span>
+            <span>总额度 ¥<b id="ovQuota">0.00</b></span>
+          </div>
+        </div>
+        <div class="card stat">
+          <div class="card-head"><span>累计消费金额</span></div>
+          <div class="big-num small"><span class="cur">¥</span><span id="ovSpent2">0.00</span>
+            <span class="unit">CNY</span></div>
+          <div class="muted tiny" id="ovSpentSub">约 $0.00 · <span id="ovLedger">0</span> 条计费记录</div>
+        </div>
+      </div>
+
+      <div class="kpi-grid">
+        <div class="kpi"><div class="kpi-label">Token 总量</div>
+          <div class="kpi-val" id="kTok">0</div>
+          <div class="kpi-sub" id="kTokSub">输入 + 输出 + 思考</div></div>
+        <div class="kpi"><div class="kpi-label">输入 Token</div>
+          <div class="kpi-val in" id="kIn">0</div>
+          <div class="kpi-sub">别人说的话，我们"读"的成本</div></div>
+        <div class="kpi"><div class="kpi-label">输出 Token</div>
+          <div class="kpi-val out" id="kOut">0</div>
+          <div class="kpi-sub">我说的话，我们"写"的成本</div></div>
+        <div class="kpi"><div class="kpi-label">思考 Token</div>
+          <div class="kpi-val think" id="kThink">0</div>
+          <div class="kpi-sub">按回复复杂度派生</div></div>
+        <div class="kpi"><div class="kpi-label">消息条数</div>
+          <div class="kpi-val" id="kMsg">0</div>
+          <div class="kpi-sub" id="kMsgSub">0 个会话</div></div>
+        <div class="kpi"><div class="kpi-label">输入/输出比</div>
+          <div class="kpi-val" id="kRatio">0</div>
+          <div class="kpi-sub">越高说明我听得多说得少</div></div>
+      </div>
+
+      <div class="card chart-card">
+        <div class="card-head">
+          <span>消费金额（CNY）</span>
+          <div class="seg" id="tsSeg">
+            <button class="on" data-days="14">近 14 天</button>
+            <button data-days="30">近 30 天</button>
+          </div>
+        </div>
+        <div class="chart" id="tsChart"></div>
+      </div>
+
+      <div class="two-col">
+        <div class="card">
+          <div class="card-head"><span>按会话消费 Top</span><span class="hint">点条目看聊天</span></div>
+          <div class="rank-list" id="rankList"></div>
+        </div>
+        <div class="card">
+          <div class="card-head"><span>最近 48 小时节奏</span><span class="hint">每条消息即时计入</span></div>
+          <div class="hours" id="hoursChart"></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-head"><span>消息种类分布</span></div>
+        <div class="kinds" id="kindList"></div>
+      </div>
+    </section>
+
+    <!-- ============ 聊天计费 ============ -->
+    <section class="view" id="view-chat">
+      <div class="chat-wrap">
+        <div class="chat-list card">
+          <div class="chat-search">
+            <input id="chatSearch" placeholder="搜索会话…" autocomplete="off">
+          </div>
+          <div class="conv-list" id="convList"></div>
+        </div>
+        <div class="chat-main card">
+          <div class="chat-head">
+            <div class="chat-id">
+              <button class="chat-av-btn" id="chatAvBtn" title="点这里给这个人塞 API Key">
+                <span id="chatAv">?</span>
+                <i class="key-dot" id="chatKeyDot"></i>
+              </button>
+              <div>
+                <div class="chat-title" id="chatTitle">选择一个会话</div>
+                <div class="chat-billing" id="chatBilling"></div>
+              </div>
+            </div>
+            <div class="chat-meta" id="chatMeta"></div>
+          </div>
+          <div class="chat-body" id="chatBody">
+            <div class="empty">左侧点一个会话，看看这段对话花了多少钱</div>
+          </div>
+          <div class="chat-foot">
+            <div class="cost-strip" id="costStrip"></div>
+            <div class="draft-box">
+              <div class="draft-head">
+                <span class="draft-title">拟回复 <i class="tip">不会自动发送，你自己复制</i></span>
+                <span class="draft-actions">
+                  <input id="draftTopic" placeholder="想表达什么？（可留空）" autocomplete="off">
+                  <button class="btn small green" id="btnDraft">生成</button>
+                  <button class="btn small ghost" id="btnDraftCfg">设置</button>
+                </span>
+              </div>
+              <div class="draft-list" id="draftList">
+                <span class="muted tiny">点「生成」按你的说话风格给几条候选回复</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ 额度与 Key ============ -->
+    <section class="view" id="view-billing">
+      <div class="hero-grid">
+        <div class="card balance">
+          <div class="card-head"><span>总额度</span><span class="hint">可随时调整</span></div>
+          <div class="big-num"><span class="cur">¥</span><span id="blQuota">0.00</span></div>
+          <div class="quota-edit">
+            <input type="number" id="quotaInput" step="10" min="0" placeholder="输入总额度">
+            <button class="btn" id="btnSaveQuota">保存</button>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-head"><span>消费进度</span></div>
+          <div class="big-num small"><span class="cur">¥</span><span id="blSpent">0.00</span>
+            <span class="unit" id="blPct">0%</span></div>
+          <div class="bar"><div class="bar-fill warn" id="blBar"></div></div>
+          <div class="muted tiny">剩余 ¥<b id="blRemain">0.00</b> ·
+            超额告警线 <span id="blWarn">80%</span></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-head">
+          <span>API Key 与额度分配</span>
+          <button class="btn small" id="btnAddKey">+ 新建 Key</button>
+        </div>
+        <div class="key-list" id="keyList"></div>
+      </div>
+
+      <div class="card">
+        <div class="card-head"><span>按模型消费</span></div>
+        <div class="model-usage" id="modelUsage"></div>
+      </div>
+    </section>
+
+    <!-- ============ 模型广场 ============ -->
+    <section class="view" id="view-market">
+      <div class="market-head">
+        <div>
+          <div class="mh-title">全部供应商 <span class="pill ghost" id="mkCount">0 个模型</span></div>
+          <div class="mh-sub">所有价格单位：元 / 百万 tokens。选中的模型决定整个仪表盘的计价方式。</div>
+        </div>
+        <div class="mh-right">
+          <input id="mkSearch" placeholder="搜索模型名称…" autocomplete="off">
+          <button class="btn" id="btnAddModel">+ 自定义模型</button>
+        </div>
+      </div>
+      <div class="model-grid" id="modelGrid"></div>
+    </section>
+
+    <!-- ============ Token 实验室 ============ -->
+    <section class="view" id="view-lab">
+      <div class="two-col">
+        <div class="card">
+          <div class="card-head"><span>Token 试算器</span><span class="hint">输入文字，看看怎么计价</span></div>
+          <textarea id="labInput" rows="7" placeholder="粘贴一段话，实时估算 token 与费用…"></textarea>
+          <div class="lab-btns">
+            <button class="btn small" data-fill="在吗">在吗</button>
+            <button class="btn small" data-fill="这个报错怎么解决？Traceback (most recent call last): KeyError: 'user_id'">报错</button>
+            <button class="btn small" data-fill="哈哈哈哈哈哈哈哈">哈哈哈</button>
+            <button class="btn small" data-fill="😀😀😀">表情</button>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-head"><span>估算结果</span><span class="hint" id="labModel"></span></div>
+          <div class="lab-result" id="labResult"></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-head"><span>计价公式</span></div>
+        <pre class="formula">输入费用 = 输入tokens / 1e6 × 输入单价
+输出费用 = 输出tokens / 1e6 × 输出单价
+缓存费用 = 命中缓存的输入tokens / 1e6 × 缓存单价
+思考费用 = 思考tokens / 1e6 × 输出单价 × 思考倍率
+─────────────────────────────────────
+合计     = 输入 + 输出 + 缓存 + 思考
+
+思考 token 不是常数，而是一个函数：
+  思考 = 基准 + 放大系数 × 输入token × 内容密度   （设上限）
+其中内容密度：报错 2.2 > 代码 2.0 > 链接 1.8 > 疑问 1.5 > 普通 1.0
+              > 纯表情 0.15 > 短确认 0.12
+所以「回一句嗯」和「回一段报错分析」的思考成本差两个数量级。</pre>
+      </div>
+    </section>
+  </main>
+</div>
+
+<div class="toast-wrap" id="toastWrap"></div>
+
+<!-- 给某个会话塞 API Key -->
+<div class="modal-mask" id="keyModal">
+  <div class="modal">
+    <div class="modal-head">
+      <div>
+        <div class="modal-title">给这个会话塞一个 Key</div>
+        <div class="modal-sub" id="keyModalSub">—</div>
+      </div>
+      <button class="modal-x" id="keyModalClose">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="modal-hint">
+        选中的 Key 会决定这个会话的计价模型。
+        <b>该会话的全部历史消息会立刻按新模型重算</b>，金额、额度占用、排行榜同步更新。
+      </div>
+      <div class="key-pick" id="keyPick"></div>
+      <div class="modal-row">
+        <span class="muted tiny">想换个模型？去「模型广场」给 Key 换模型，或改模型的输入/输出单价。</span>
+        <button class="btn small ghost" id="keyModalMarket">去模型广场</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="/app.js"></script>
+</body>
+</html>

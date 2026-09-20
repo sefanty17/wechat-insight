@@ -1,0 +1,134 @@
+/* ==========================================================================
+   浅色主题覆盖（追加在原有深色样式之后，靠优先级生效）
+   ==========================================================================
+
+   为什么用"追加覆盖"而不是重写整个 style.css：
+     原是 513 行的深色样式，直接重写风险大（可能漏掉某个视图）。
+     它已经用了 CSS 变量（--bg / --card / --txt …），所以在末尾重定义变量
+     就能整体翻过来，再补几处写死的深色即可。
+
+   配色对齐 00-core/wc-design.css 的浅色设计系统，保证和主页面一致。
+   ========================================================================== */
+
+:root{
+  --bg:#ffffff;
+  --bg-2:#fafafa;
+  --card:#ffffff;
+  --card-2:#ffffff;
+  --line:#e8e8ea;
+  --line-2:#d8d8dc;
+  --txt:#1f2328;
+  --txt-2:#5c6370;
+  --txt-3:#8b919c;
+  --green:#12a150;
+  --green-d:#0d8442;
+  --blue:#2f6feb;
+  --blue-2:#1f56c4;
+  --violet:#7a5af8;
+  --amber:#c47d0a;
+  --rose:#d92d4b;
+  --r:12px;
+  --r-s:8px;
+  --shadow:0 4px 12px rgba(16,24,40,.08);
+}
+
+body{background:#fafafa;color:#1f2328}
+
+/* 那层深色环境光在浅色下要换成极淡的蓝光 */
+.bg-glow{
+  background-image:linear-gradient(180deg,#f4f7fd 0%,rgba(244,247,253,0) 100%) !important;
+  height:260px;
+}
+
+/* 侧边栏：深色 → 浅灰 */
+.sidebar{background:#f7f7f8 !important;border-right:1px solid var(--line)}
+
+/* 顶栏：加细边和轻微阴影，浅色下才分得开 */
+.topbar{border-bottom:1px solid var(--line);background:#fff}
+
+/* 卡片：去掉深色渐变，改白底细边 */
+.card,.kpi{
+  background:#fff !important;
+  border:1px solid var(--line) !important;
+  box-shadow:none;
+}
+
+/* 余额卡：原来是绿色调渐变，浅色下改成淡绿 */
+.balance{
+  background:linear-gradient(135deg,#f2fbf6,#eef7ff) !important;
+  border:1px solid #dcefe4 !important;
+}
+
+/* 进度条槽 / 分段控件 / 各种半透明白 → 实心浅灰 */
+.bar,.seg,.kind-chip,.mini{background:#f0f0f1 !important}
+.seg button.on{background:#fff !important;color:#1f2328 !important;
+  box-shadow:0 1px 2px rgba(16,24,40,.08)}
+
+/* 表格 */
+table th{background:#f7f7f8 !important;color:#5c6370 !important;
+  border-bottom:1px solid var(--line) !important}
+table td{border-bottom:1px solid var(--line) !important}
+table tr:hover td{background:#fafafa !important}
+
+/* 弹窗 / 下拉：白底 + 正常阴影 */
+.modal,.modal-box,.dropdown,.popover{
+  background:#fff !important;
+  border:1px solid var(--line) !important;
+  box-shadow:0 12px 32px rgba(16,24,40,.14) !important;
+}
+
+/* 输入框 */
+input,textarea,select{
+  background:#fff !important;
+  border:1px solid var(--line-2) !important;
+  color:#1f2328 !important;
+}
+input:focus,textarea:focus,select:focus{
+  border-color:var(--blue) !important;
+  box-shadow:0 0 0 3px rgba(47,111,235,.12) !important;
+  outline:none;
+}
+
+/* 代码/等宽块 */
+code,pre{background:#f7f7f8 !important;color:#1f2328 !important}
+
+/* 滚动条 */
+::-webkit-scrollbar-thumb{background:#d4d6db !important;border-radius:10px}
+::-webkit-scrollbar-thumb:hover{background:#b9bcc4 !important}
+
+/* 按钮：主按钮用深色（Linear 风格），次按钮白底灰边 */
+.btn{background:#1f2328 !important;color:#fff !important;border-color:#1f2328 !important}
+.btn:hover{background:#0d1117 !important}
+.btn.ghost,.btn.secondary{
+  background:#fff !important;color:#5c6370 !important;border:1px solid var(--line-2) !important;
+}
+.btn.ghost:hover,.btn.secondary:hover{background:#f7f7f8 !important;color:#1f2328 !important}
+
+/* ---------------- 侧边栏导航 ----------------
+   ⚠️ 踩过的坑：原深色样式里 .nav-item.active 用的是
+   「绿色半透明渐变 + 浅色文字」，浅色主题下变成"浅字配浅底"，
+   选中项几乎看不见。这里显式指定深色文字 + 实心浅绿底。
+*/
+.nav-item{
+  color:var(--txt-2) !important;
+  border-radius:8px;
+}
+.nav-item:hover{background:#f0f0f1 !important;color:var(--txt) !important}
+.nav-item.active{
+  background:#eaf7ef !important;
+  color:#0d6b38 !important;
+  font-weight:600 !important;
+  border:1px solid #cbe9d8 !important;
+}
+/* 侧边栏里的小字（Chat · Cost · Meter 那种）也要压暗一档 */
+.sidebar .dim,.sidebar .tiny,.sidebar [class*="sub"]{color:var(--txt-3) !important}
+
+/* 顶栏右侧的 pill / 价格提示：浅色下加深文字 */
+.pill{background:#f7f7f8 !important;color:var(--txt-2) !important;
+  border:1px solid var(--line) !important}
+.pill.blue,.pill.green{background:#eaf7ef !important;color:#0d6b38 !important;
+  border-color:#cbe9d8 !important}
+
+/* 图表里的绿色小块（原深色下的强调色）在浅色下要够深才看得见 */
+.sg-green,.bar-fill{background:linear-gradient(90deg,#12a150,#0e9ba8) !important}
+

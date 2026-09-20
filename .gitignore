@@ -1,0 +1,86 @@
+# ==========================================================================
+#  .gitignore — 微信洞察
+# ==========================================================================
+#
+# ⚠️⚠️ 最重要的一段：**用户数据与密钥绝不能提交**。
+#     这个仓库的核心能力就是"读你自己的微信数据库"，
+#     所以本地一定会存在大量私人数据；一旦误提交，等于把你的聊天记录公开。
+#
+#     原则：**白名单式思考** —— 只提交源码/文档，
+#     所有 .db / .json 数据 / .jsonl / .log / 生成物 一律忽略。
+#     新增功能时如果产生了新文件，先问自己"这是不是私人数据"。
+# ==========================================================================
+
+# ---------------- 私人数据（绝对禁止）----------------
+# 解密后的微信消息库（15 万条聊天原文）
+00-core/chat.db
+00-core/chat.db-wal
+00-core/chat.db-shm
+*.db
+*.db-wal
+*.db-shm
+
+# 解密中间产物 + 数据库密钥
+.tmpdec/
+decrypted/
+all_keys.json
+
+# 我发出的所有消息原文
+my_texts.jsonl
+my_texts.json
+
+# 旧仪表盘的账本 / 缓存（含完整聊天内容）
+ledger.json
+flow_cache.json
+billing.json
+stats.json
+state.json
+market_extra.json
+auto_reply_state.json
+style_stats.json
+history.json
+
+# ---------------- 密钥（绝对禁止）----------------
+draft.json
+.env
+.env.*
+*.key
+secrets.json
+
+# ---------------- 生成的报告（含聊天内容）----------------
+02-report/report*.html
+03-persona/persona-*.html
+01-memory/history.json
+04-pipeline/*.csv
+*-[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9].csv
+
+# ---------------- 用户自定义模板（含业务数据）----------------
+04-pipeline/templates.json
+
+# ---------------- 归档与开发残留 ----------------
+_deprecated/
+_shots/
+_shots*/
+_*_shots/
+__pycache__/
+*.pyc
+*.pyo
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# ---------------- 日志 ----------------
+*.log
+server.log
+server.err.log
+
+# ---------------- 个人风格档案 ----------------
+PERSONA_*.md
+style_persona.md
+
+# ---------------- 编辑器 / 系统 ----------------
+.vscode/
+.idea/
+*.swp
+Thumbs.db
+desktop.ini
